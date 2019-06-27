@@ -1,7 +1,6 @@
 include lib.mk
 
-hello: ##: Darkness my old friend
-	echo sup
+.PHONY: image
 
-its: hello ##: Good to see you once again
-	echo fart
+image: ##: Build AMI
+	$(MAKE) -C image build

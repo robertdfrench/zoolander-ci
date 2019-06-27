@@ -1,0 +1,17 @@
+{
+	"builders": [{
+		"type": "amazon-ebs",
+		"region": "us-east-1",
+		"source_ami": "ami-0a01a5636f3c4f21c",
+		"instance_type": "t2.micro",
+		"ssh_username": "root",
+		"ami_name": "cirrus-omnios {{ timestamp }}",
+		"tags": {
+			"OS_Version": "OmniOS",
+			"Release": "r151030",
+			"Base_AMI_Name": "{{ .SourceAMIName }}",
+			"Extra": "{{ .SourceAMITags.TagName }}"
+		}
+	}],
+	"provisioners": [{"type": "shell", "script": "provision.sh"}]
+}
