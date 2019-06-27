@@ -1,0 +1,8 @@
+# Terraform
+.terraform/*
+terraform.tfstate
+terraform.tfstate.backup
+
+# State
+packed.txt
+ami.json
