@@ -1,0 +1,8 @@
+[package]
+name = "zoolander-ci"
+version = "0.1.0"
+authors = ["Robert D French <robert@robertdfrench.me>"]
+edition = "2018"
+
+[dependencies]
+libc = { git = "https://github.com/rust-lang/libc.git", branch = "master" }
