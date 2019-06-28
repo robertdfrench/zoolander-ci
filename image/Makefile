@@ -5,6 +5,7 @@ terraform=$(call which, terraform)
 
 packed.txt: $(packer) packer.json provision.sh ##: Create an update AMI
 	$(packer) build packer.json
+	@touch $@
 
 .terraform/plugins/init: $(terraform) providers.tf
 	$(terraform) init
