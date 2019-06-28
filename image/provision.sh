@@ -7,4 +7,4 @@ mkdir -p $BASEDIR/cirrus/.ssh
 cp $HOME/.ssh/authorized_keys $BASEDIR/cirrus/.ssh
 chown -R cirrus $BASEDIR/cirrus/.ssh
 
-pkg install git vim build-essential zip
+pkg install git build-essential zip
