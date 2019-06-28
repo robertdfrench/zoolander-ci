@@ -7,6 +7,9 @@ install: AWS_DEFAULT_REGION.env $(terraform) .terraform/plugins/init zoolander.t
 	cp image/ami.json ami.auto.tfvars.json
 	$(terraform) apply -auto-approve
 
+uninstall: AWS_DEFAULT_REGION.env $(terraform) .terraform/plugins/init  ##: Remove any deployed infrastructure
+	$(terraform) destroy
+
 .terraform/plugins/init: $(terraform) providers.tf # Download any needed terraform plugins
 	$(terraform) init
 	@touch $@
