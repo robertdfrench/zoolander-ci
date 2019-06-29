@@ -10,12 +10,12 @@ build: $(cargo) ##: Build the application
 test: $(cargo) ##: Run unit tests
 	$(cargo) test
 
-check: add_remote $(git)
+check: add_remote $(git)  ##: Run tests on a working host
 	$(git) add . \
-		&& $(git) commit --amend \
-		&& $(git) push -u zoolander --force
+		&& $(git) commit --allow-empty \
+		&& $(git) push -u zoolander +HEAD:master
 
-add_remote: $(git) remote.txt  ## Set up the zoolander remote
+add_remote: $(git) remote.txt  ##: Set up the zoolander remote
 	($(git) remote | grep zoolander > /dev/null) \
 		|| git remote add zoolander `cat remote.txt`
 	($(git) remote -v | grep `cat remote.txt` > /dev/null) \
@@ -23,6 +23,7 @@ add_remote: $(git) remote.txt  ## Set up the zoolander remote
 
 install: host.json ##: Stand up host infrastructure
 
+.PHONY: remote.txt
 remote.txt: $(jq)
-	$(MAKE) -C host host.json
+	$(MAKE) -C host install
 	$(jq) -r '"root@" + .zoolander.value + ":zoolander"' host/host.json > $@

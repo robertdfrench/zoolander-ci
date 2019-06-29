@@ -11,6 +11,26 @@ resource "aws_instance" "zoolander" {
   tags = {
     Name = "zoolander"
   }
+
+  connection {
+    host = aws_instance.zoolander.public_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = ["git init zoolander"]
+  }
+
+  provisioner "file" {
+    source      = "post-receive-hook.sh"
+    destination = "zoolander/.git/hooks/post-receive"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x zoolander/.git/hooks/post-receive",
+      "git config --system receive.denyCurrentBranch ignore"
+    ]
+  }
 }
 
 variable "ami" {}
