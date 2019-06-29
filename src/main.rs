@@ -1,3 +1,5 @@
+mod zone;
+
 fn main() {
-    println!("Hello, world!");
+    println!("{}", zone::name());
 }
