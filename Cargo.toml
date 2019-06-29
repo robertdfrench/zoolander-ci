@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 libc = { git = "https://github.com/rust-lang/libc.git", branch = "master" }
+fastcgi = "1.0.0"

@@ -25,10 +25,16 @@ resource "aws_instance" "zoolander" {
     destination = "zoolander/.git/hooks/post-receive"
   }
 
+  provisioner "file" {
+    source      = "nginx.conf"
+    destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "chmod +x zoolander/.git/hooks/post-receive",
-      "git config --system receive.denyCurrentBranch ignore"
+      "git config --system receive.denyCurrentBranch ignore",
+      "svcadm enable svc:/network/http"
     ]
   }
 }
@@ -42,6 +48,13 @@ resource "aws_security_group" "zoolander" {
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [join("/", [data.external.nat_ip.result.ip, 32])]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = [join("/", [data.external.nat_ip.result.ip, 32])]
   }

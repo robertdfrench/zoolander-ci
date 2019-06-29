@@ -15,6 +15,9 @@ check: add_remote $(git)  ##: Run tests on a working host
 		&& $(git) commit --allow-empty \
 		&& $(git) push -u zoolander +HEAD:master
 
+shell: remote.txt ##: Get a root shell on the zoolander host
+	ssh `cat remote.txt | cut -d':' -f1`
+
 add_remote: $(git) remote.txt  ##: Set up the zoolander remote
 	($(git) remote | grep zoolander > /dev/null) \
 		|| git remote add zoolander `cat remote.txt`
