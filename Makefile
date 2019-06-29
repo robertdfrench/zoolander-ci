@@ -13,7 +13,7 @@ test: $(cargo) ##: Run unit tests
 check: add_remote $(git)
 	$(git) add . \
 		&& $(git) commit --amend \
-		&& $(git) push --force
+		&& $(git) push -u zoolander --force
 
 add_remote: $(git) remote.txt  ## Set up the zoolander remote
 	($(git) remote | grep zoolander > /dev/null) \
