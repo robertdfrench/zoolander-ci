@@ -9,10 +9,14 @@ install: $(terraform) .terraform/plugins/init zoolander.tf ##: Deploy latest inf
 	$(terraform) apply -auto-approve
 	$(terraform) output -json > host.json
 
-uninstall: $(terraform) .terraform/plugins/init  ##: Remove any deployed infrastructure
+uninstall: $(terraform) .terraform/plugins/init ##: Remove any deployed infrastructure
 	$(call assertEnv, AWS_DEFAULT_REGION)
 	$(terraform) destroy
 
-.terraform/plugins/init: $(terraform) providers.tf # Download any needed terraform plugins
+# Download plugins for each resource provider
+.terraform/plugins/initialized.state: $(terraform) providers.tf
 	$(terraform) init
 	@touch $@
+
+clean: ##: Remove any purely-local assets (not terraform state)
+	rm -rf .terraform ami.auto.tfvars.json host.json

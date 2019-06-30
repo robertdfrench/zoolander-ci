@@ -4,5 +4,7 @@ terraform.tfstate
 terraform.tfstate.backup
 
 # State
-packed.txt
+*.state
+
+# Assets
 ami.json
