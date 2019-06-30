@@ -1,4 +1,5 @@
 mod zone;
+mod http_document;
 
 extern crate fastcgi;
 
@@ -9,7 +10,8 @@ fn main() {
     let tcp = TcpListener::bind("127.0.0.1:9000").unwrap();
 
     fastcgi::run_tcp(|mut req| {
-        write!(&mut req.stdout(), "Content-Type: text/plain\n\n{}", zone::name())
+        let response = http_document::text_plain(zone::name());
+        write!(&mut req.stdout(), "{}", response)
             .unwrap_or(());
     }, &tcp)
 }
