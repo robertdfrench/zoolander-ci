@@ -10,7 +10,7 @@ impl Zoolander {
     }
 
     pub fn handle(self: &Self) -> String {
-        "hello".to_string()
+        self.routes.get("GET /").unwrap()()
     }
 
     pub fn route(self: &mut Self, path: &str, handler: fn() -> String) {

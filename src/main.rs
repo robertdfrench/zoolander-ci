@@ -1,28 +1,9 @@
-mod application;
-mod http_document;
-mod zone;
-
-extern crate fastcgi;
-
-use std::io::Write;
-use std::net::TcpListener;
-use application::Zoolander;
-
-fn fcgi_start(app: Zoolander, address: &str) {
-    let socket = TcpListener::bind(address).unwrap();
-
-    fastcgi::run_tcp(move |mut req| {
-        let response = app.handle();
-        write!(&mut req.stdout(), "{}", response).unwrap_or(());
-    }, &socket)
-}
+use zoolander_ci::*;
 
 fn main() {
-    let mut app = Zoolander::new();
+    let mut app = new();
 
-    app.route("GET /", || {
-        http_document::text_plain(zone::name())
-    });
+    app.route("GET /", greet);
 
-    fcgi_start(app, "127.0.0.1:9000")
+    serve_fcgi(app, "127.0.0.1:9000")
 }
