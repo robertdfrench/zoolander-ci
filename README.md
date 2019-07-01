@@ -1,7 +1,6 @@
 # Zoolander CI
-Zoolander CI is a minimalist CI environment for illumos-based projects, or
-cross-platform projects that can reasonably be tested on illumos. It provides a
-single VM which manages CI for a single GitHub project. If you want a real CI
+Zoolander CI is a minimal CI environment for illumos-based projects. It provides
+a single VM which manages CI for a single GitHub project. If you want a real CI
 system, try [Cirrus CI](https://cirrus-ci.org/).
 
 This repository is capable of bootstrapping and deploying itself, assuming you
