@@ -10,4 +10,14 @@ instance, images, and security groups. You will also need a github account.
 Unit tests can be run via `make test`, integration tests can be launched
 (together with a functioning illumos system!) via `make check`.
 
-See the [Makefile](Makefile) for more details.
+### Getting Started
+* [Create a GitHub API Token](https://github.com/settings/tokens/new)
+* [Configure your AWS Credentials file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+* Install:
+  * [Packer](https://www.packer.io/downloads.html)
+  * [Terraform](https://www.terraform.io/downloads.html)
+  * [jq](https://stedolan.github.io/jq/)
+  * [GNU Make](https://www.gnu.org/software/make/) (probably already installed).
+
+Each [Makefile](Makefile) in this repo is self-documenting. Just run `make help`
+in any directory to describe the available tasks.
