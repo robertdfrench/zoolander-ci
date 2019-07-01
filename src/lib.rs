@@ -9,7 +9,7 @@ pub use perimeter::serve_fcgi;
 
 impl Application for Zoolander {
     fn handle(self: &Self) -> String {
-        self.handle()
+        self.handle("GET /")
     }
 }
 
