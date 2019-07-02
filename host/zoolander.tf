@@ -4,7 +4,7 @@ output "zoolander" {
 
 resource "aws_instance" "zoolander" {
   ami             = var.ami.value
-  instance_type   = "t2.micro"
+  instance_type   = "t2.medium"
   security_groups = [aws_security_group.zoolander.name]
   key_name        = aws_key_pair.zoolander.key_name
 
@@ -16,15 +16,6 @@ resource "aws_instance" "zoolander" {
     host = aws_instance.zoolander.public_ip
   }
 
-  provisioner "remote-exec" {
-    inline = ["git init zoolander"]
-  }
-
-  provisioner "file" {
-    source      = "post-receive-hook.sh"
-    destination = "zoolander/.git/hooks/post-receive"
-  }
-
   provisioner "file" {
     source      = "nginx.conf"
     destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
@@ -32,9 +23,20 @@ resource "aws_instance" "zoolander" {
 
   provisioner "remote-exec" {
     inline = [
+      "svcadm enable svc:/network/http",
+      "git init zoolander"
+    ]
+  }
+
+  provisioner "file" {
+    source      = "post-receive-hook.sh"
+    destination = "zoolander/.git/hooks/post-receive"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
       "chmod +x zoolander/.git/hooks/post-receive",
-      "git config --system receive.denyCurrentBranch ignore",
-      "svcadm enable svc:/network/http"
+      "git config --system receive.denyCurrentBranch ignore"
     ]
   }
 }

@@ -10,7 +10,11 @@ build: $(cargo) ##: Build the application
 test: $(cargo) ##: Run unit tests
 	$(cargo) test
 
-check: add_remote $(git)  ##: Run tests on a working host
+launch: test $(cargo) ##: Launch new FCGI server, killing old one if it exists
+	kill -9 `ps aux | awk '/zoola/ { print $$2 }'` || true
+	nohup $(cargo) run &
+
+deploy: remote $(git)  ##: Launch on a working host
 	$(git) add . \
 		&& $(git) commit --allow-empty \
 		&& $(git) push -u zoolander +HEAD:master
@@ -18,13 +22,14 @@ check: add_remote $(git)  ##: Run tests on a working host
 shell: remote.txt ##: Get a root shell on the zoolander host
 	ssh `cat remote.txt | cut -d':' -f1`
 
-add_remote: $(git) remote.txt  ##: Set up the zoolander remote
+remove: ##: Tear down your zoolander instance
+	$(MAKE) -C host uninstall
+
+remote: $(git) remote.txt  ##: Set up the zoolander remote
 	($(git) remote | grep zoolander > /dev/null) \
 		|| git remote add zoolander `cat remote.txt`
 	($(git) remote -v | grep `cat remote.txt` > /dev/null) \
 		|| git remote set-url zoolander `cat remote.txt`
-
-install: host.json ##: Stand up host infrastructure
 
 .PHONY: remote.txt
 remote.txt: $(jq)

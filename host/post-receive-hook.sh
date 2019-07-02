@@ -2,4 +2,4 @@
 cd ..
 env -i git reset --hard
 export PATH=/usr/gnu/bin:$PATH:/opt/ooce/bin
-make test
+make launch
