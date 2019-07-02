@@ -10,6 +10,9 @@ terraform.tfstate.backup
 # Intermediate state
 remote.txt
 
+# Local Invocations
+jobs/*
+
 #Added by cargo
 #
 #already existing elements are commented out

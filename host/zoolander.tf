@@ -56,7 +56,7 @@ resource "aws_security_group" "zoolander" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [join("/", [data.external.nat_ip.result.ip, 32])]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
