@@ -12,7 +12,7 @@ test: $(cargo) ##: Run unit tests
 
 launch: test $(cargo) ##: Launch new FCGI server, killing old one if it exists
 	kill -9 `ps aux | awk '/zoola/ { print $$2 }'` || true
-	nohup $(cargo) run &
+	nohup $(cargo) run >/tmp/zoolander.out 2>/tmp/zoolander.err &
 
 deploy: remote $(git)  ##: Launch on a working host
 	$(git) add . \
