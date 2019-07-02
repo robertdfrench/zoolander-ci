@@ -22,8 +22,8 @@ deploy: remote $(git)  ##: Launch on a working host
 shell: remote.txt ##: Get a root shell on the zoolander host
 	ssh `cat remote.txt | cut -d':' -f1`
 
-remove: ##: Tear down your zoolander instance
-	$(MAKE) -C host uninstall
+destroy: ##: Tear down your zoolander instance
+	$(MAKE) -C infrastructure uninstall
 
 remote: $(git) remote.txt  ##: Set up the zoolander remote
 	($(git) remote | grep zoolander > /dev/null) \
@@ -33,5 +33,5 @@ remote: $(git) remote.txt  ##: Set up the zoolander remote
 
 .PHONY: remote.txt
 remote.txt: $(jq)
-	$(MAKE) -C host install
-	$(jq) -r '"root@" + .zoolander.value + ":zoolander"' host/host.json > $@
+	$(MAKE) -C infrastructure install
+	$(jq) -r '"root@" + .zoolander.value + ":zoolander"' infrastructure/host.json > $@
