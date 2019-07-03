@@ -22,7 +22,7 @@ deploy: remote $(git)  ##: Launch on a working host
 shell: remote.txt ##: Get a root shell on the zoolander host
 	ssh `cat remote.txt | cut -d':' -f1`
 
-destroy: ##: Tear down your zoolander instance
+delete: ##: Tear down your zoolander instance
 	$(MAKE) -C infrastructure uninstall
 
 remote: $(git) remote.txt  ##: Set up the zoolander remote
