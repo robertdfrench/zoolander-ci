@@ -31,6 +31,12 @@ remote: $(git) remote.txt  ##: Set up the zoolander remote
 	($(git) remote -v | grep `cat remote.txt` > /dev/null) \
 		|| git remote set-url zoolander `cat remote.txt`
 
+rotate: remote.txt ##: Rotate your instance's API tokens
+	@printf "GitHub Personal Access Token: "
+	@read -s GHPAT && echo "$$GHPAT" \
+		| ssh `cat remote.txt | cut -d':' -f1` bash -c 'cat /dev/stdin > /tmp/ghpat'
+
+
 .PHONY: remote.txt
 remote.txt: $(jq)
 	$(MAKE) -C infrastructure install
