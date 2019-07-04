@@ -62,8 +62,7 @@ fn serve_fcgi(socket: TcpListener) {
 
 fn main() {
     let address = "127.0.0.1:9000";
-    let connection = TcpListener::bind(address);
-    match connection {
+    match TcpListener::bind(address) {
         Ok(socket) => serve_fcgi(socket),
         Err(e) => panic!("Could not bind to {}. {}", address, e)
     };
