@@ -1,18 +1,27 @@
 extern crate fastcgi;
 
 use std::fs;
-use std::io::Write;
+use std::io;
+use std::io::{Read,Write};
 use std::net::TcpListener;
 
-mod zone;
 mod pathify;
 mod http_document;
 
-use zone::name;
 use pathify::*;
 
-fn greet() -> String {
-    http_document::text_plain(name())
+fn persist(content: String) -> io::Result<()> {
+    fs::create_dir_all("jobs/ab")?;
+    let mut f = fs::File::create("jobs/ab/c122")?;
+    f.write_all(content.as_bytes())?;
+    Ok(())
+}
+
+fn save(content: String) -> String {
+    match persist(content) {
+        Ok(_) => http_document::text_plain("Sounds good!"),
+        Err(_) => http_document::text_plain("Sounds bad!")
+    }
 }
 
 fn read_log(uri: String) -> String {
@@ -31,6 +40,7 @@ fn invalid_request() -> String {
 trait FCGIHelper {
     fn method(&self) -> String;
     fn uri(&self) -> String;
+    fn content(&mut self) -> String;
     fn respond_with(&mut self, response: String);
 }
 
@@ -40,6 +50,13 @@ impl FCGIHelper for fastcgi::Request {
     }
     fn uri(&self) -> String {
         self.param("REQUEST_URI").unwrap_or("/".to_string())
+    }
+    fn content(&mut self) -> String {
+        let mut b = String::new();
+        match self.stdin().read_to_string(&mut b) {
+            Ok(_) => b,
+            Err(_) => "".to_string()
+        }
     }
     fn respond_with(&mut self, response: String) {
         match write!(&mut self.stdout(), "{}", response) {
@@ -53,7 +70,7 @@ fn serve_fcgi(socket: TcpListener) {
     fastcgi::run_tcp(move |mut req| {
         let response = match req.method().as_str() {
             "GET" => read_log(req.uri()),
-            "POST" => greet(),
+            "POST" => save(req.content()),
             _ => invalid_request()
         };
         req.respond_with(response);
@@ -77,11 +94,6 @@ mod integration {
     use std::fs;
 
     #[test]
-    fn can_greet() {
-        assert_eq!(greet(), "Content-Type: text/plain\n\nglobal".to_string())
-    }
-
-    #[test]
     fn can_read_log() {
         fs::create_dir_all("jobs/ab").unwrap();
         let mut file = File::create("jobs/ab/c123").unwrap();
@@ -95,5 +107,20 @@ mod integration {
     fn can_read_empty_log() {
         let response = read_log("/jobs/abc124".to_string());
         assert_eq!(response, "Status: 404\nContent-Type: text/plain\n\nNo such job.");
+    }
+
+    #[test]
+    fn writing_works() {
+        let r1 = save("Original Content".to_string());
+        assert_eq!(r1, "Content-Type: text/plain\n\nSounds good!");
+    }
+
+    #[test]
+    fn write_then_read() {
+        let r1 = save("Original Content".to_string());
+        assert_eq!(r1, "Content-Type: text/plain\n\nSounds good!");
+
+        let response = read_log("/jobs/abc122".to_string());
+        assert_eq!(response, "Content-Type: text/plain\n\nOriginal Content");
     }
 }
