@@ -11,11 +11,11 @@ mod http_document;
 use zone::name;
 use pathify::*;
 
-pub fn greet() -> String {
+fn greet() -> String {
     http_document::text_plain(name())
 }
 
-pub fn read_log(uri: String) -> String {
+fn read_log(uri: String) -> String {
     let path = basename(uri);
     let job_output = fs::read_to_string("jobs/".to_owned() + &pathify(path.to_string()));
     match job_output {
@@ -24,7 +24,7 @@ pub fn read_log(uri: String) -> String {
     }
 }
 
-pub fn invalid_request() -> String {
+fn invalid_request() -> String {
     http_document::text_plain("Wtf son")
 }
 
