@@ -2,8 +2,8 @@ use serde::{Deserialize};
 
 #[derive(Deserialize)]
 pub struct PushEvent {
-    r#ref: String,
-    after: String
+    pub r#ref: String,
+    pub after: String
 }
 
 #[cfg(test)]

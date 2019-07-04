@@ -41,3 +41,6 @@ rotate: remote.txt ##: Rotate your instance's API tokens
 remote.txt: $(jq)
 	$(MAKE) -C infrastructure install
 	$(jq) -r '"root@" + .zoolander.value + ":zoolander"' infrastructure/host.json > $@
+
+%.job:
+	@echo Rick loves $*

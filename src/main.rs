@@ -1,32 +1,49 @@
 extern crate fastcgi;
 
 use std::fs;
-use std::io;
 use std::io::{Read,Write};
 use std::net::TcpListener;
+use std::{thread, time};
+use std::process::{Command,Child};
 
 mod pathify;
 mod http_document;
+mod push_event;
 
 use pathify::*;
+use push_event::PushEvent;
 
-fn persist(content: String) -> io::Result<()> {
-    fs::create_dir_all("jobs/ab")?;
-    let mut f = fs::File::create("jobs/ab/c122")?;
-    f.write_all(content.as_bytes())?;
-    Ok(())
+fn launch(content: String) -> String {
+    let parse: serde_json::Result<PushEvent> = serde_json::from_str(&content);
+    match parse {
+        Err(e) => http_document::text_plain(&format!("Could not parse payload. {}", e)),
+        Ok(push_event) => spawn(push_event.after)
+    }
 }
 
-fn save(content: String) -> String {
-    match persist(content) {
-        Ok(_) => http_document::text_plain("Sounds good!"),
-        Err(_) => http_document::text_plain("Sounds bad!")
+fn bash(command: String) -> std::io::Result<Child> {
+    Command::new("bash").arg("-c").arg(&command).spawn()
+}
+
+fn spawn(r: String) -> String {
+
+    fn with_directory(r: String) -> String {
+        let command = format!("gmake {}.job > {}", r, pathify(&r));
+        match bash(command) {
+            Ok(_) => http_document::text_plain("Launched supervisor"),
+            Err(_) => http_document::text_plain("Could not launch supervisor")
+        }
+    }
+
+    match fs::create_dir_all(parent(&r)) {
+        Ok(_) => with_directory(r),
+        Err(_) => http_document::text_plain("Could not create working directory")
     }
 }
 
 fn read_log(uri: String) -> String {
     let path = basename(uri);
-    let job_output = fs::read_to_string("jobs/".to_owned() + &pathify(path.to_string()));
+    let job_output = fs::read_to_string(&pathify(&path.to_string()));
     match job_output {
         Ok(v) => http_document::text_plain(&v),
         Err(_) => "Status: 404\nContent-Type: text/plain\n\nNo such job.".to_string()
@@ -70,7 +87,7 @@ fn serve_fcgi(socket: TcpListener) {
     fastcgi::run_tcp(move |mut req| {
         let response = match req.method().as_str() {
             "GET" => read_log(req.uri()),
-            "POST" => save(req.content()),
+            "POST" => launch(req.content()),
             _ => invalid_request()
         };
         req.respond_with(response);
@@ -110,17 +127,18 @@ mod integration {
     }
 
     #[test]
-    fn writing_works() {
-        let r1 = save("Original Content".to_string());
-        assert_eq!(r1, "Content-Type: text/plain\n\nSounds good!");
+    fn spawns_make() {
+        assert_eq!(spawn("112233".to_string()), "Content-Type: text/plain\n\nLaunched supervisor");
     }
 
     #[test]
-    fn write_then_read() {
-        let r1 = save("Original Content".to_string());
-        assert_eq!(r1, "Content-Type: text/plain\n\nSounds good!");
+    fn launch_then_read() {
+        let r1 = launch(r#"{"ref": "a", "after": "00c137"}"#.to_string());
+        assert_eq!(r1, "Content-Type: text/plain\n\nLaunched supervisor");
 
-        let response = read_log("/jobs/abc122".to_string());
-        assert_eq!(response, "Content-Type: text/plain\n\nOriginal Content");
+        thread::sleep(time::Duration::new(1, 0));
+
+        let response = read_log("/jobs/00c137".to_string());
+        assert_eq!(response, "Content-Type: text/plain\n\nRick loves 00c137\n");
     }
 }
