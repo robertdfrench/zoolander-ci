@@ -9,15 +9,14 @@ mod pathify;
 mod http_document;
 
 use zone::name;
-use pathify::pathify;
+use pathify::*;
 
 pub fn greet() -> String {
     http_document::text_plain(name())
 }
 
 pub fn read_log(uri: String) -> String {
-    let path = uri.split("/").collect::<Vec<&str>>()
-        .pop().unwrap();
+    let path = basename(uri);
     let job_output = fs::read_to_string("jobs/".to_owned() + &pathify(path.to_string()));
     match job_output {
         Ok(v) => http_document::text_plain(&v),
@@ -29,18 +28,45 @@ pub fn invalid_request() -> String {
     http_document::text_plain("Wtf son")
 }
 
-fn main() {
-    let socket = TcpListener::bind("127.0.0.1:9000").unwrap();
+trait FCGIHelper {
+    fn method(&self) -> String;
+    fn uri(&self) -> String;
+    fn respond_with(&mut self, response: String);
+}
+
+impl FCGIHelper for fastcgi::Request {
+    fn method(&self) -> String {
+        self.param("REQUEST_METHOD").unwrap_or("GET".to_string())
+    }
+    fn uri(&self) -> String {
+        self.param("REQUEST_URI").unwrap_or("/".to_string())
+    }
+    fn respond_with(&mut self, response: String) {
+        match write!(&mut self.stdout(), "{}", response) {
+            Ok(_) => (),
+            Err(e) => println!("Failed to return a response. {}", e)
+        };
+    }
+}
+
+fn serve_fcgi(socket: TcpListener) {
     fastcgi::run_tcp(move |mut req| {
-        let method = req.param("REQUEST_METHOD").unwrap();
-        let uri = req.param("REQUEST_URI").unwrap();
-        let response = match method.as_str() {
-            "GET" => read_log(uri),
+        let response = match req.method().as_str() {
+            "GET" => read_log(req.uri()),
             "POST" => greet(),
             _ => invalid_request()
         };
-        write!(&mut req.stdout(), "{}", response).unwrap_or(());
+        req.respond_with(response);
     }, &socket)
+}
+
+fn main() {
+    let address = "127.0.0.1:9000";
+    let connection = TcpListener::bind(address);
+    match connection {
+        Ok(socket) => serve_fcgi(socket),
+        Err(e) => panic!("Could not bind to {}. {}", address, e)
+    };
 }
 
 

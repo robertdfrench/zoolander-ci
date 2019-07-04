@@ -4,6 +4,14 @@ pub fn pathify(uuid: String) -> String {
     path
 }
 
+pub fn basename(path: String) -> String {
+    let mut components = path.split("/").collect::<Vec<&str>>();
+    match components.pop() {
+        Some(v) => v,
+        None => ""
+    }.to_string()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
