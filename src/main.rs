@@ -28,7 +28,7 @@ fn bash(command: String) -> std::io::Result<Child> {
 fn spawn(r: String) -> String {
 
     fn with_directory(r: String) -> String {
-        let command = format!("gmake {}.job > {}", r, pathify(&r));
+        let command = format!("gmake {}.job > {} 2>&1", r, pathify(&r));
         match bash(command) {
             Ok(_) => http_document::text_plain("Launched supervisor"),
             Err(_) => http_document::text_plain("Could not launch supervisor")
@@ -129,16 +129,5 @@ mod integration {
     #[test]
     fn spawns_make() {
         assert_eq!(spawn("112233".to_string()), "Content-Type: text/plain\n\nLaunched supervisor");
-    }
-
-    #[test]
-    fn launch_then_read() {
-        let r1 = launch(r#"{"ref": "a", "after": "00c137"}"#.to_string());
-        assert_eq!(r1, "Content-Type: text/plain\n\nLaunched supervisor");
-
-        thread::sleep(time::Duration::new(1, 0));
-
-        let response = read_log("/jobs/00c137".to_string());
-        assert_eq!(response, "Content-Type: text/plain\n\nRick loves 00c137\n");
     }
 }

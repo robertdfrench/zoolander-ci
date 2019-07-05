@@ -48,6 +48,6 @@ remote.txt: $(jq)
 ci_user=$(shell if [ `whoami` = "root" ]; then echo "derek"; else whoami; fi)
 %.job:
 	mkdir -p /tmp/zoolander-ci/$*
-	git --work-tree /tmp/zoolander-ci/$* checkout $* -- .
+	GIT_DIR=".git" git --work-tree /tmp/zoolander-ci/$* checkout $* -- .
 	chown -R $(ci_user) /tmp/zoolander-ci/$*
 	sudo -u $(ci_user) -i gmake -C /tmp/zoolander-ci/$* test check
