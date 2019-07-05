@@ -8,7 +8,10 @@ build: $(cargo) ##: Build the application
 	$(cargo) build
 
 test: $(cargo) ##: Run unit tests
-	$(cargo) test
+	$(cargo) test --tests "test"
+
+check: $(cargo) ##: Run integration tests
+	$(cargo) test --tests "integration"
 
 launch: test $(cargo) ##: Launch new FCGI server, killing old one if it exists
 	kill -9 `ps aux | awk '/zoola/ { print $$2 }'` || true
@@ -42,5 +45,9 @@ remote.txt: $(jq)
 	$(MAKE) -C infrastructure install
 	$(jq) -r '"root@" + .zoolander.value + ":zoolander"' infrastructure/host.json > $@
 
+ci_user=$(shell if [ `whoami` = "root" ]; then echo "derek"; else whoami; fi)
 %.job:
-	@echo Rick loves $*
+	mkdir -p /tmp/zoolander-ci/$*
+	git --work-tree /tmp/zoolander-ci/$* checkout $* -- .
+	chown -R $(ci_user) /tmp/zoolander-ci/$*
+	sudo -u $(ci_user) -i gmake -C /tmp/zoolander-ci/$* test check
