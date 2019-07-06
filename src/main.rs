@@ -3,7 +3,6 @@ extern crate fastcgi;
 use std::fs;
 use std::io::{Read,Write};
 use std::net::TcpListener;
-use std::{thread, time};
 use std::process::{Command,Child};
 
 mod pathify;

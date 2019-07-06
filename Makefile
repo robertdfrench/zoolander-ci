@@ -47,7 +47,6 @@ remote.txt: $(jq)
 
 ci_user=$(shell if [ `whoami` = "root" ]; then echo "derek"; else whoami; fi)
 %.job:
-	mkdir -p /tmp/zoolander-ci/$*
-	GIT_DIR=".git" git --work-tree /tmp/zoolander-ci/$* checkout $* -- .
+	$(git) clone https://github.com/robertdfrench/zoolander-ci.git /tmp/zoolander-ci/$*
 	chown -R $(ci_user) /tmp/zoolander-ci/$*
 	sudo -u $(ci_user) -i gmake -C /tmp/zoolander-ci/$* -f Zoolander.mk test
