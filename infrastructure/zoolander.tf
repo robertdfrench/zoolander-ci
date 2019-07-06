@@ -36,8 +36,14 @@ resource "aws_instance" "zoolander" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x zoolander/.git/hooks/post-receive",
-      "git config --system receive.denyCurrentBranch ignore"
+      "git config --system receive.denyCurrentBranch ignore",
+      "useradd -b /export -m -s /bin/bash derek"
     ]
+  }
+
+  provisioner "file" {
+    source      = "derek_profile.bash"
+    destination = "/export/derek/.profile"
   }
 }
 
