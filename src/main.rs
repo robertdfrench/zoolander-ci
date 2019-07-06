@@ -27,7 +27,7 @@ fn bash(command: String) -> std::io::Result<Child> {
 fn spawn(r: String) -> String {
 
     fn with_directory(r: String) -> String {
-        let command = format!("gmake {}.job > {} 2>&1", r, pathify(&r));
+        let command = format!("bash supervisor.sh {} > {} 2>&1", r, pathify(&r));
         match bash(command) {
             Ok(_) => http_document::text_plain("Launched supervisor"),
             Err(_) => http_document::text_plain("Could not launch supervisor")
