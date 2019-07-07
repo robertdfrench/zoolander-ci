@@ -12,35 +12,35 @@ mod push_event;
 use pathify::*;
 use push_event::PushEvent;
 
-fn launch(content: String) -> String {
-    let parse: serde_json::Result<PushEvent> = serde_json::from_str(&content);
+fn launch(content: &str) -> String {
+    let parse: serde_json::Result<PushEvent> = serde_json::from_str(content);
     match parse {
         Err(e) => http_document::text_plain(&format!("Could not parse payload. {}", e)),
-        Ok(push_event) => spawn(push_event.after)
+        Ok(push_event) => spawn(&push_event.after)
     }
 }
 
-fn bash(command: String) -> std::io::Result<Child> {
-    Command::new("bash").arg("-c").arg(&command).spawn()
+fn bash(command: &str) -> std::io::Result<Child> {
+    Command::new("bash").arg("-c").arg(command).spawn()
 }
 
-fn spawn(r: String) -> String {
+fn spawn(commit: &str) -> String {
 
-    fn with_directory(r: String) -> String {
-        let command = format!("bash supervisor.sh {} > {} 2>&1", r, pathify(&r));
-        match bash(command) {
+    fn with_directory(commit: &str) -> String {
+        let command = format!("bash supervisor.sh {} > {} 2>&1", commit, pathify(commit));
+        match bash(&command) {
             Ok(_) => http_document::text_plain("Launched supervisor"),
             Err(_) => http_document::text_plain("Could not launch supervisor")
         }
     }
 
-    match fs::create_dir_all(parent(&r)) {
-        Ok(_) => with_directory(r),
+    match fs::create_dir_all(parent(commit)) {
+        Ok(_) => with_directory(commit),
         Err(_) => http_document::text_plain("Could not create working directory")
     }
 }
 
-fn read_log(uri: String) -> String {
+fn read_log(uri: &str) -> String {
     let path = basename(uri);
     let job_output = fs::read_to_string(&pathify(&path.to_string()));
     match job_output {
@@ -53,7 +53,7 @@ trait FCGIHelper {
     fn method(&self) -> String;
     fn uri(&self) -> String;
     fn content(&mut self) -> String;
-    fn respond_with(&mut self, response: String);
+    fn respond_with(&mut self, response: &str);
 }
 
 impl FCGIHelper for fastcgi::Request {
@@ -70,7 +70,7 @@ impl FCGIHelper for fastcgi::Request {
             Err(_) => "".to_string()
         }
     }
-    fn respond_with(&mut self, response: String) {
+    fn respond_with(&mut self, response: &str) {
         match write!(&mut self.stdout(), "{}", response) {
             Ok(_) => (),
             Err(e) => println!("Failed to return a response. {}", e)
@@ -81,11 +81,11 @@ impl FCGIHelper for fastcgi::Request {
 fn serve_fcgi(socket: TcpListener) {
     fastcgi::run_tcp(move |mut req| {
         let response = match req.method().as_str() {
-            "GET" => read_log(req.uri()),
-            "POST" => launch(req.content()),
+            "GET" => read_log(&req.uri()),
+            "POST" => launch(&req.content()),
             _ => http_document::method_not_allowed("Can't route this request")
         };
-        req.respond_with(response);
+        req.respond_with(&response);
     }, &socket)
 }
 
@@ -111,18 +111,18 @@ mod integration {
         let mut file = File::create("jobs/ab/c123").unwrap();
         file.write_all(b"Hello").unwrap();
 
-        let response = read_log("/jobs/abc123".to_string());
+        let response = read_log("/jobs/abc123");
         assert_eq!(response, "Content-Type: text/plain\n\nHello");
     }
 
     #[test]
     fn can_read_empty_log() {
-        let response = read_log("/jobs/abc124".to_string());
+        let response = read_log("/jobs/abc124");
         assert_eq!(response, "Content-Type: text/plain\nStatus: 404 Not Found\n\nNo such job.");
     }
 
     #[test]
     fn spawns_make() {
-        assert_eq!(spawn("112233".to_string()), "Content-Type: text/plain\n\nLaunched supervisor");
+        assert_eq!(spawn("112233"), "Content-Type: text/plain\n\nLaunched supervisor");
     }
 }

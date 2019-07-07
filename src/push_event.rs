@@ -165,6 +165,6 @@ mod tests {
 }"#;
         let e: PushEvent = serde_json::from_str(input).unwrap();
         assert_eq!(e.r#ref, "refs/tags/simple-tag");
-        assert_eq!(e.r#after, "0000000000000000000000000000000000000000");
+        assert_eq!(e.after, "0000000000000000000000000000000000000000");
     }
 }

@@ -3,23 +3,23 @@ use std::collections::HashMap;
 
 pub fn text_plain(body: &str) -> String {
     let mut doc = new();
-    doc.write_header("Content-Type".to_string(), "text/plain".to_string());
+    doc.write_header("Content-Type", "text/plain");
     doc.append_body(body);
     doc.to_string()
 }
 
 pub fn not_found(body: &str) -> String {
     let mut doc = new();
-    doc.write_header("Content-Type".to_string(), "text/plain".to_string());
-    doc.write_header("Status".to_string(), "404 Not Found".to_string());
+    doc.write_header("Content-Type", "text/plain");
+    doc.write_header("Status", "404 Not Found");
     doc.append_body(body);
     doc.to_string()
 }
 
 pub fn method_not_allowed(body: &str) -> String {
     let mut doc = new();
-    doc.write_header("Content-Type".to_string(), "text/plain".to_string());
-    doc.write_header("Status".to_string(), "405 Method Not Allowed".to_string());
+    doc.write_header("Content-Type", "text/plain");
+    doc.write_header("Status", "405 Method Not Allowed");
     doc.append_body(body);
     doc.to_string()
 }
@@ -30,8 +30,8 @@ pub struct HttpDocument {
 }
 
 impl HttpDocument {
-    pub fn write_header(self: &mut Self, k: String, v: String) {
-        self.headers.insert(k, v);
+    pub fn write_header(self: &mut Self, k: &str, v: &str) {
+        self.headers.insert(String::from(k), String::from(v));
     }
     pub fn append_body(&mut self, content: &str) {
         self.body.push_str(content);
@@ -77,27 +77,27 @@ mod tests {
     #[test]
     fn new_has_content_type() {
         let mut r = new();
-        r.write_header("Content-Type".to_string(), "text/plain".to_string());
+        r.write_header("Content-Type", "text/plain");
         assert!(r.headers.contains_key("Content-Type"))
     }
 
     #[test]
     fn sorted_headers() {
         let mut r = new();
-        r.write_header("D".to_string(), "4".to_string());
-        r.write_header("C".to_string(), "3".to_string());
-        r.write_header("B".to_string(), "2".to_string());
-        r.write_header("A".to_string(), "1".to_string());
+        r.write_header("D", "4");
+        r.write_header("C", "3");
+        r.write_header("B", "2");
+        r.write_header("A", "1");
         assert_eq!(r.to_string(), "A: 1\nB: 2\nC: 3\nD: 4\n\n");
     }
 
     #[test]
     fn headers_is_a_sorted_iterator() {
         let mut r = new();
-        r.write_header("D".to_string(), "4".to_string());
-        r.write_header("C".to_string(), "3".to_string());
-        r.write_header("B".to_string(), "2".to_string());
-        r.write_header("A".to_string(), "1".to_string());
+        r.write_header("D", "4");
+        r.write_header("C", "3");
+        r.write_header("B", "2");
+        r.write_header("A", "1");
         assert_eq!(r.sorted_headers(), vec!["A", "B", "C", "D"]);
     }
 }

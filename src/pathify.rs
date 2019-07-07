@@ -1,10 +1,10 @@
-pub fn pathify(uuid: &String) -> String {
-    let mut path = uuid.clone();
+pub fn pathify(uuid: &str) -> String {
+    let mut path = String::from(uuid);
     if path.len() > 2 { path.insert(2, '/') };
-    "jobs/".to_string() + &path
+    String::from("jobs/") + &path
 }
 
-pub fn basename(path: String) -> String {
+pub fn basename(path: &str) -> String {
     let mut components = path.split("/").collect::<Vec<&str>>();
     match components.pop() {
         Some(v) => v,
@@ -12,9 +12,9 @@ pub fn basename(path: String) -> String {
     }.to_string()
 }
 
-pub fn parent(uuid: &String) -> String {
+pub fn parent(uuid: &str) -> String {
     match uuid.len() {
-        0 ... 2 => "jobs/".to_string(),
+        0 ... 2 => String::from("jobs/"),
         _ => format!("jobs/{}", &uuid[..2])
     }
 }
@@ -25,11 +25,11 @@ mod tests {
 
     #[test]
     fn normal() {
-        assert_eq!(pathify(&"abc".to_string()), "jobs/ab/c");
+        assert_eq!(pathify("abc"), "jobs/ab/c");
     }
 
     #[test]
     fn short() {
-        assert_eq!(pathify(&"ab".to_string()), "jobs/ab");
+        assert_eq!(pathify("ab"), "jobs/ab");
     }
 }
