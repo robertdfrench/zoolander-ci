@@ -8,6 +8,22 @@ pub fn text_plain(body: &str) -> String {
     doc.to_string()
 }
 
+pub fn not_found(body: &str) -> String {
+    let mut doc = new();
+    doc.write_header("Content-Type".to_string(), "text/plain".to_string());
+    doc.write_header("Status".to_string(), "404 Not Found".to_string());
+    doc.append_body(body);
+    doc.to_string()
+}
+
+pub fn method_not_allowed(body: &str) -> String {
+    let mut doc = new();
+    doc.write_header("Content-Type".to_string(), "text/plain".to_string());
+    doc.write_header("Status".to_string(), "405 Method Not Allowed".to_string());
+    doc.append_body(body);
+    doc.to_string()
+}
+
 pub struct HttpDocument {
     headers: HashMap<String, String>,
     body: String

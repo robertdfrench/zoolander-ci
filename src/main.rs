@@ -45,12 +45,8 @@ fn read_log(uri: String) -> String {
     let job_output = fs::read_to_string(&pathify(&path.to_string()));
     match job_output {
         Ok(v) => http_document::text_plain(&v),
-        Err(_) => "Status: 404\nContent-Type: text/plain\n\nNo such job.".to_string()
+        Err(_) => http_document::not_found("No such job.")
     }
-}
-
-fn invalid_request() -> String {
-    http_document::text_plain("Wtf son")
 }
 
 trait FCGIHelper {
@@ -87,7 +83,7 @@ fn serve_fcgi(socket: TcpListener) {
         let response = match req.method().as_str() {
             "GET" => read_log(req.uri()),
             "POST" => launch(req.content()),
-            _ => invalid_request()
+            _ => http_document::method_not_allowed("Can't route this request")
         };
         req.respond_with(response);
     }, &socket)
