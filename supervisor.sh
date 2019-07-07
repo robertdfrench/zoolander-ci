@@ -107,7 +107,7 @@ target_url() {
 	repo=$1
 	ref=$2
 
-	echo "http://54.211.12.29/zoolander/jobs/$ref"
+	echo "http://35.174.116.35/zoolander/jobs/$ref"
 }
 
 # Update the GitHub status for $repo's $ref to be "$status". Use $token for auth

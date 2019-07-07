@@ -118,7 +118,7 @@ mod integration {
     #[test]
     fn can_read_empty_log() {
         let response = read_log("/jobs/abc124".to_string());
-        assert_eq!(response, "Status: 404\nContent-Type: text/plain\n\nNo such job.");
+        assert_eq!(response, "Content-Type: text/plain\nStatus: 404 Not Found\n\nNo such job.");
     }
 
     #[test]

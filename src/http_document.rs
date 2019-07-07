@@ -36,10 +36,21 @@ impl HttpDocument {
     pub fn append_body(&mut self, content: &str) {
         self.body.push_str(content);
     }
+    pub fn sorted_headers(&self) -> Vec<&str> {
+        let mut h = Vec::new();
+        for header in self.headers.keys() {
+            h.push(header.as_str())
+        }
+        h.sort();
+        h
+    }
     pub fn to_string(&self) -> String {
         let mut s = String::new();
-        for (header, value) in &self.headers {
-            s.push_str(format!("{}: {}\n", header, value).as_str());
+        for header in self.sorted_headers() {
+            match self.headers.get(header) {
+                Some(value) => s.push_str(format!("{}: {}\n", header, value).as_str()),
+                None => unreachable!()
+            };
         }
         s.push_str("\n");
         s.push_str(self.body.as_str());
@@ -68,5 +79,25 @@ mod tests {
         let mut r = new();
         r.write_header("Content-Type".to_string(), "text/plain".to_string());
         assert!(r.headers.contains_key("Content-Type"))
+    }
+
+    #[test]
+    fn sorted_headers() {
+        let mut r = new();
+        r.write_header("D".to_string(), "4".to_string());
+        r.write_header("C".to_string(), "3".to_string());
+        r.write_header("B".to_string(), "2".to_string());
+        r.write_header("A".to_string(), "1".to_string());
+        assert_eq!(r.to_string(), "A: 1\nB: 2\nC: 3\nD: 4\n\n");
+    }
+
+    #[test]
+    fn headers_is_a_sorted_iterator() {
+        let mut r = new();
+        r.write_header("D".to_string(), "4".to_string());
+        r.write_header("C".to_string(), "3".to_string());
+        r.write_header("B".to_string(), "2".to_string());
+        r.write_header("A".to_string(), "1".to_string());
+        assert_eq!(r.sorted_headers(), vec!["A", "B", "C", "D"]);
     }
 }
