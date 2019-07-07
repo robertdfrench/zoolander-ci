@@ -132,6 +132,22 @@ doas() {
 	fi
 }
 
+# Make it clear how to check for updates
+print_refresh_banner() {
+	cat >/dev/stdout <<EOF
+ #######                                                              #####  ### 
+      #   ####   ####  #        ##   #    # #####  ###### #####      #     #  #  
+     #   #    # #    # #       #  #  ##   # #    # #      #    #     #        #  
+    #    #    # #    # #      #    # # #  # #    # #####  #    #     #        #  
+   #     #    # #    # #      ###### #  # # #    # #      #####      #        #  
+  #      #    # #    # #      #    # #   ## #    # #      #   #      #     #  #  
+ #######  ####   ####  ###### #    # #    # #####  ###### #    #      #####  ### 
+
+################################################################################
+#            Refresh your browser to see the latest build output               #
+################################################################################
+EOF
+}
 
 # Test $repo's $ref as the $ci_user. Assumes worktree contains Zoolander.mk with
 # a "test" target.
@@ -140,6 +156,7 @@ launch_job() {
 	ref=$2
 	ci_user=$3
 
+	print_refresh_banner
 	worktree_for_user $repo $ref $ci_user
 	doas $ci_user gmake -C $(full_worktree_path $repo $ref) -f Zoolander.mk test 
 }
