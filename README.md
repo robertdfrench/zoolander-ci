@@ -4,8 +4,12 @@ provides a single VM which manages CI for a single GitHub project, namely itself
 
 Zoolander's job is to provide the little green checkmarks next to commits which
 pass their tests, and to add a little red X next to any commit which fails its
-tests. Look at
-[this repo's commits](https://github.com/robertdfrench/zoolander-ci/commits/master)
+tests:
+
+![checks](status_checks.png)
+
+Feel free to browse through this repo's
+[prior commits](https://github.com/robertdfrench/zoolander-ci/commits/master)
 to see this in action. Per normal GitHub conventions, clicking on either the
 checkmark or an X next to a commit will provide you with a "Details" link that
 will show you the console output for that commit's CI run.
