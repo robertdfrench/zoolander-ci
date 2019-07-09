@@ -15,7 +15,7 @@ use push_event::PushEvent;
 fn launch(content: &str) -> String {
     let parse: serde_json::Result<PushEvent> = serde_json::from_str(content);
     match parse {
-        Err(e) => http_document::text_plain(&format!("Could not parse payload. {}", e)),
+        Err(e) => http_document::okay(&format!("Could not parse payload. {}", e)),
         Ok(push_event) => spawn(&push_event.after)
     }
 }
@@ -29,14 +29,14 @@ fn spawn(commit: &str) -> String {
     fn with_directory(commit: &str) -> String {
         let command = format!("bash supervisor.sh {} > {} 2>&1", commit, pathify(commit));
         match bash(&command) {
-            Ok(_) => http_document::text_plain("Launched supervisor"),
-            Err(_) => http_document::text_plain("Could not launch supervisor")
+            Ok(_) => http_document::okay("Launched supervisor"),
+            Err(_) => http_document::okay("Could not launch supervisor")
         }
     }
 
     match fs::create_dir_all(parent(commit)) {
         Ok(_) => with_directory(commit),
-        Err(_) => http_document::text_plain("Could not create working directory")
+        Err(_) => http_document::okay("Could not create working directory")
     }
 }
 
@@ -44,7 +44,7 @@ fn read_log(uri: &str) -> String {
     let path = basename(uri);
     let job_output = fs::read_to_string(&pathify(&path.to_string()));
     match job_output {
-        Ok(v) => http_document::text_plain(&v),
+        Ok(v) => http_document::okay(&v),
         Err(_) => http_document::not_found("No such job.")
     }
 }
@@ -112,7 +112,7 @@ mod integration {
         file.write_all(b"Hello").unwrap();
 
         let response = read_log("/jobs/abc123");
-        assert_eq!(response, "Content-Type: text/plain\n\nHello");
+        assert_eq!(response, "Content-Type: text/plain\nStatus: 200 OK\n\nHello");
     }
 
     #[test]
@@ -123,6 +123,6 @@ mod integration {
 
     #[test]
     fn spawns_make() {
-        assert_eq!(spawn("112233"), "Content-Type: text/plain\n\nLaunched supervisor");
+        assert_eq!(spawn("112233"), "Content-Type: text/plain\nStatus: 200 OK\n\nLaunched supervisor");
     }
 }
