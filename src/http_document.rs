@@ -1,42 +1,39 @@
 use std::string::String;
 use std::collections::HashMap;
 
-pub fn text_plain(body: &str) -> String {
-    let mut doc = new();
-    doc.write_header("Content-Type", "text/plain");
-    doc.append_body(body);
-    doc.to_string()
+pub fn okay(body: &str) -> String {
+    plaintext_response("200 OK", body)
 }
 
 pub fn not_found(body: &str) -> String {
-    let mut doc = new();
-    doc.write_header("Content-Type", "text/plain");
-    doc.write_header("Status", "404 Not Found");
-    doc.append_body(body);
-    doc.to_string()
+    plaintext_response("404 Not Found", body)
 }
 
 pub fn method_not_allowed(body: &str) -> String {
+    plaintext_response("405 Method Not Allowed", body)
+}
+
+fn plaintext_response(status: &str, body: &str) -> String {
     let mut doc = new();
     doc.write_header("Content-Type", "text/plain");
-    doc.write_header("Status", "405 Method Not Allowed");
+    doc.write_header("Status", status);
     doc.append_body(body);
     doc.to_string()
 }
 
-pub struct HttpDocument {
+struct HttpDocument {
     headers: HashMap<String, String>,
     body: String
 }
 
 impl HttpDocument {
-    pub fn write_header(self: &mut Self, k: &str, v: &str) {
+    fn write_header(self: &mut Self, k: &str, v: &str) {
         self.headers.insert(String::from(k), String::from(v));
     }
-    pub fn append_body(&mut self, content: &str) {
+    fn append_body(&mut self, content: &str) {
         self.body.push_str(content);
     }
-    pub fn sorted_headers(&self) -> Vec<&str> {
+    fn sorted_headers(&self) -> Vec<&str> {
         let mut h = Vec::new();
         for header in self.headers.keys() {
             h.push(header.as_str())
@@ -44,7 +41,7 @@ impl HttpDocument {
         h.sort();
         h
     }
-    pub fn to_string(&self) -> String {
+    fn to_string(&self) -> String {
         let mut s = String::new();
         for header in self.sorted_headers() {
             match self.headers.get(header) {
@@ -58,7 +55,7 @@ impl HttpDocument {
     }
 }
 
-pub fn new() -> HttpDocument {
+fn new() -> HttpDocument {
     HttpDocument{
         headers: HashMap::new(),
         body: String::new()
@@ -70,8 +67,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn return_text_plain() {
-        assert_eq!(text_plain("hello"), "Content-Type: text/plain\n\nhello");
+    fn return_okay() {
+        assert_eq!(okay("hello"), "Content-Type: text/plain\nStatus: 200 OK\n\nhello");
     }
 
     #[test]
