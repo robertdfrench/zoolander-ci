@@ -15,7 +15,7 @@ use push_event::PushEvent;
 fn launch(content: &str) -> String {
     let parse: serde_json::Result<PushEvent> = serde_json::from_str(content);
     match parse {
-        Err(e) => http_document::okay(&format!("Could not parse payload. {}", e)),
+        Err(e) => http_document::error(&format!("Could not parse payload. {}", e)),
         Ok(push_event) => spawn(&push_event.after)
     }
 }
@@ -30,13 +30,13 @@ fn spawn(commit: &str) -> String {
         let command = format!("bash supervisor.sh {} > {} 2>&1", commit, pathify(commit));
         match bash(&command) {
             Ok(_) => http_document::okay("Launched supervisor"),
-            Err(_) => http_document::okay("Could not launch supervisor")
+            Err(_) => http_document::error("Could not launch supervisor")
         }
     }
 
     match fs::create_dir_all(parent(commit)) {
         Ok(_) => with_directory(commit),
-        Err(_) => http_document::okay("Could not create working directory")
+        Err(_) => http_document::error("Could not create working directory")
     }
 }
 

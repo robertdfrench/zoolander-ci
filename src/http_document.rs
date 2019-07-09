@@ -13,6 +13,10 @@ pub fn method_not_allowed(body: &str) -> String {
     plaintext_response("405 Method Not Allowed", body)
 }
 
+pub fn error(body: &str) -> String {
+    plaintext_response("500 Internal Server Error", body)
+}
+
 fn plaintext_response(status: &str, body: &str) -> String {
     let mut doc = new();
     doc.write_header("Content-Type", "text/plain");
