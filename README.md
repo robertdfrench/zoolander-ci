@@ -1,8 +1,6 @@
-<p align="center">
-![derek](derek.png)
-</p>
-
 # Zoolander CI
+![derek](derek.png)
+
 Zoolander is a minimal CI environment for the [illumos][1] operating system. It
 provides a single VM which manages CI for a single GitHub project, namely itself.
 
