@@ -1,7 +1,7 @@
 # Zoolander CI
-Zoolander CI is a minimal CI environment for illumos-based projects. It provides
-a single VM which manages CI for a single GitHub project, namely itself. If you
-are looking for a *real* CI system, try [Cirrus CI](https://cirrus-ci.org/).
+Zoolander is a minimal CI environment for the [illumos][1] operating system. It
+provides a single VM which manages CI for a single GitHub project, namely itself.
+If you are looking for a *real* CI system, try [Cirrus CI](https://cirrus-ci.org/).
 
 ### Features
 * Updates commit status when builds start, pass, or fail
@@ -82,3 +82,5 @@ Finally, to configure the webhook for your repository, go to `Settings >
 Webhooks > Add webhook`. The payload URL will look like `http://X.X.X.X/zoolander/webhook`
 where `X.X.X.X` is your Zoolander instance ip. Set the content-type to json, and
 then click "Add Webhook".
+
+[1]: https://www.illumos.org
