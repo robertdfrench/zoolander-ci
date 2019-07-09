@@ -19,6 +19,7 @@ will show you the console output for that commit's CI run.
 * Self-deploying. Simply `make deploy` (with proper AWS credentials)
 * Dogfood capable! (Zoolander CI is tested via a Zoolander CI instance!)
 * Runs CI jobs as an unprivileged user (aptly named `derek`)
+* Define build pipelines with plain old GNU Make instead of some proprietary format (See [Zoolander.mk](Zoolander.mk)).
 * **Plaintext browser ui!** Who needs Javascript when you have Ctrl-R?
 ```console
  #######                                                              #####  ### 
