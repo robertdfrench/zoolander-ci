@@ -3,11 +3,8 @@ mod push_event;
 mod supervisor;
 mod fcgi;
 
-use push_event::PushEvent;
-
 fn launch(content: &str) -> String {
-    let parse: serde_json::Result<PushEvent> = serde_json::from_str(content);
-    match parse {
+    match push_event::from_str(&content) {
         Err(e) => http_document::error(&format!("Could not parse payload. {}", e)),
         Ok(push_event) => match supervisor::spawn_job(&push_event.after) {
             Ok(_) => http_document::okay("Launched supervisor"),

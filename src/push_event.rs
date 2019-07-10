@@ -6,6 +6,10 @@ pub struct PushEvent {
     pub after: String
 }
 
+pub fn from_str(content: &str) -> serde_json::Result<PushEvent> {
+    serde_json::from_str(content)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -19,9 +23,9 @@ mod tests {
                 "ignore": true
             }
         }"#;
-        let e: PushEvent = serde_json::from_str(input).unwrap();
+        let e = from_str(input).unwrap();
         assert_eq!(e.r#ref, "abc123");
-        assert_eq!(e.r#after, "321cba");
+        assert_eq!(e.after, "321cba");
     }
 
     #[test]
@@ -163,7 +167,7 @@ mod tests {
     "site_admin": false
   }
 }"#;
-        let e: PushEvent = serde_json::from_str(input).unwrap();
+        let e = from_str(input).unwrap();
         assert_eq!(e.r#ref, "refs/tags/simple-tag");
         assert_eq!(e.after, "0000000000000000000000000000000000000000");
     }
