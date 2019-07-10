@@ -3,11 +3,11 @@ extern crate fastcgi;
 use std::fs;
 use std::io::{Read,Write};
 use std::net::TcpListener;
-use std::process::{Command,Child};
 
 mod pathify;
 mod http_document;
 mod push_event;
+mod supervisor;
 
 use pathify::*;
 use push_event::PushEvent;
@@ -20,15 +20,11 @@ fn launch(content: &str) -> String {
     }
 }
 
-fn bash(command: &str) -> std::io::Result<Child> {
-    Command::new("bash").arg("-c").arg(command).spawn()
-}
-
 fn spawn(commit: &str) -> String {
 
     fn with_directory(commit: &str) -> String {
-        let command = format!("bash supervisor.sh {} > {} 2>&1", commit, pathify(commit));
-        match bash(&command) {
+        let job_log = pathify(commit);
+        match supervisor::spawn_job(commit, &job_log) {
             Ok(_) => http_document::okay("Launched supervisor"),
             Err(_) => http_document::error("Could not launch supervisor")
         }
