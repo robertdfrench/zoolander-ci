@@ -162,12 +162,28 @@ launch_job() {
 	doas $ci_user gmake -C $(full_worktree_path $repo $ref) -f Zoolander.mk test 
 }
 
+# Close file descriptors inherited from the parent process, instead redirecting
+# all output (including stderr) to $logfile
+redirect_output() {
+	logfile=$1
+
+	exec 1<&-
+	exec 2<&-
+	exec 1<>$logfile
+	exec 2>&1
+}
 
 # main
 ref=$1
+logfile=$2
 repo=robertdfrench/zoolander-ci
 ci_user=$(if_root_then_derek)
 token=$(cat /tmp/ghpat)
+
+# Optionally send stdout & stderr to user-specified logfile
+if [ -n "${logfile+x}" ]; then
+	redirect_output $logfile
+fi
 
 mark_status "pending" $repo $ref $token
 if launch_job $repo $ref $ci_user; then
