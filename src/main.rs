@@ -1,11 +1,7 @@
-extern crate fastcgi;
-
-use std::io::{Read,Write};
-use std::net::TcpListener;
-
 mod http_document;
 mod push_event;
 mod supervisor;
+mod fcgi;
 
 use push_event::PushEvent;
 
@@ -32,52 +28,16 @@ fn read_log(uri: &str) -> String {
     }
 }
 
-trait FCGIHelper {
-    fn method(&self) -> String;
-    fn uri(&self) -> String;
-    fn content(&mut self) -> String;
-    fn respond_with(&mut self, response: &str);
-}
-
-impl FCGIHelper for fastcgi::Request {
-    fn method(&self) -> String {
-        self.param("REQUEST_METHOD").unwrap_or("GET".to_string())
-    }
-    fn uri(&self) -> String {
-        self.param("REQUEST_URI").unwrap_or("/".to_string())
-    }
-    fn content(&mut self) -> String {
-        let mut b = String::new();
-        match self.stdin().read_to_string(&mut b) {
-            Ok(_) => b,
-            Err(_) => "".to_string()
-        }
-    }
-    fn respond_with(&mut self, response: &str) {
-        match write!(&mut self.stdout(), "{}", response) {
-            Ok(_) => (),
-            Err(e) => println!("Failed to return a response. {}", e)
-        };
-    }
-}
-
-fn serve_fcgi(socket: TcpListener) {
-    fastcgi::run_tcp(move |mut req| {
-        let response = match req.method().as_str() {
-            "GET" => read_log(&req.uri()),
-            "POST" => launch(&req.content()),
-            _ => http_document::method_not_allowed("Can't route this request")
-        };
-        req.respond_with(&response);
-    }, &socket)
-}
-
 fn main() {
     let address = "127.0.0.1:9000";
-    match TcpListener::bind(address) {
-        Ok(socket) => serve_fcgi(socket),
-        Err(e) => panic!("Could not bind to {}. {}", address, e)
-    };
+    let error = fcgi::start(address, |method, uri, content| {
+        match method {
+            "GET" => read_log(uri),
+            "POST" => launch(content),
+            _ => http_document::method_not_allowed("Can't route this request")
+        }
+    }); 
+    panic!("Could not bind to {}. {}", address, error);
 }
 
 
@@ -87,6 +47,8 @@ mod integration {
 
     use std::fs::File;
     use std::fs;
+    use std::io::Write;
+
 
     #[test]
     fn can_read_log() {
