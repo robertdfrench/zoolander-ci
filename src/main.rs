@@ -17,7 +17,7 @@ fn launch(content: &str) -> String {
 fn read_log(uri: &str) -> String {
     let mut components = uri.split("/").collect::<Vec<&str>>();
     match components.pop() {
-        None => http_document::not_found("No such job."),
+        None => http_document::bad_request("Read requests uris must contain a commit hash"),
         Some(commit) => match supervisor::read_job_log(&commit) {
             Ok(v) => http_document::okay(&v),
             Err(_) => http_document::not_found("No such job.")

@@ -10,6 +10,10 @@ pub fn not_found(body: &str) -> String {
     plaintext_response("404 Not Found", body)
 }
 
+pub fn bad_request(body: &str) -> String {
+    plaintext_response("400 Bad Request", body)
+}
+
 pub fn method_not_allowed(body: &str) -> String {
     plaintext_response("405 Method Not Allowed", body)
 }
