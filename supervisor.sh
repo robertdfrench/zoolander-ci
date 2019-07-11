@@ -107,7 +107,12 @@ target_url() {
 	repo=$1
 	ref=$2
 
-	echo "http://35.174.116.35/zoolander/jobs/$ref"
+	echo "http://$(public_dns)/zoolander/jobs/$ref"
+}
+
+# Determine public DNS from EC2 metadata
+public_dns() {
+	curl --silent http://169.254.169.254/latest/meta-data/public-hostname
 }
 
 # Update the GitHub status for $repo's $ref to be "$status". Use $token for auth

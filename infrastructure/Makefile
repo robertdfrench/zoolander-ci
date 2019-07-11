@@ -6,6 +6,8 @@ install: $(terraform) .terraform/plugins/init zoolander.tf ##: Deploy latest inf
 	$(call assertEnv, AWS_DEFAULT_REGION)
 	$(MAKE) -C image ami.json
 	cp image/ami.json ami.auto.tfvars.json
+	$(MAKE) -C dns ip.json
+	cp dns/ip.json ip.auto.tfvars.json
 	$(terraform) apply -auto-approve
 	$(terraform) output -json > host.json
 
