@@ -87,3 +87,10 @@ resource "aws_key_pair" "zoolander" {
   key_name   = "zoolander"
   public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
 }
+
+variable "ip" {}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.zoolander.id
+  allocation_id = var.ip.value.id
+}

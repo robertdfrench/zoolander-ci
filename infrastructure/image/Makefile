@@ -8,13 +8,13 @@ install: ami.json $(jq) ##: Build an updated AMI
 	$(jq) '.' $<
 
 # Machine-readable description of the most recently built AMI
-ami.json: .terraform/plugins/init ami.tf packed.state
+ami.json: $(terraform) .terraform/plugins/init ami.tf packed.state
 	$(call assertEnv, AWS_DEFAULT_REGION)
 	$(terraform) apply -auto-approve
 	$(terraform) output -json > $@
 
 # Download plugins for each resource provider
-.terraform/plugins/initialized.state: $(terraform) providers.tf
+.terraform/plugins/init: $(terraform) providers.tf
 	$(terraform) init
 	@touch $@
 
