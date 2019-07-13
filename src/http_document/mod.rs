@@ -25,6 +25,7 @@ pub fn error(body: &str) -> String {
 fn plaintext_response(status: &str, body: &str) -> String {
     let mut doc = new();
     doc.write_header("Content-Type", "text/plain");
+    doc.write_header("Refresh", "1");
     doc.write_header("Status", status);
     doc.append_body(body);
     doc.to_string()
@@ -66,6 +67,6 @@ mod tests {
 
     #[test]
     fn return_okay() {
-        assert_eq!(okay("hello"), "Content-Type: text/plain\nStatus: 200 OK\n\nhello");
+        assert_eq!(okay("hello"), "Content-Type: text/plain\nRefresh: 1\nStatus: 200 OK\n\nhello");
     }
 }
