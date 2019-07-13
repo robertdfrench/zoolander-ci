@@ -54,12 +54,12 @@ mod integration {
         file.write_all(b"Hello").unwrap();
 
         let response = read_log("/jobs/abc123");
-        assert_eq!(response, "Content-Type: text/plain\nStatus: 200 OK\n\nHello");
+        assert_eq!(response, "Content-Type: text/plain\nRefresh: 1\nStatus: 200 OK\n\nHello");
     }
 
     #[test]
     fn can_read_empty_log() {
         let response = read_log("/jobs/abc124");
-        assert_eq!(response, "Content-Type: text/plain\nStatus: 404 Not Found\n\nNo such job.");
+        assert_eq!(response, "Content-Type: text/plain\nRefresh: 1\nStatus: 404 Not Found\n\nNo such job.");
     }
 }
