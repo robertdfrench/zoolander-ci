@@ -23,5 +23,10 @@ packed.state: $(packer) packer.json provision.sh
 	$(packer) build packer.json
 	@touch $@
 
+deregister_old: filter_old_image_ids.jq  ##: Clean up any old images
+	aws ec2 describe-images --owners self \
+		| jq -rf $< \
+		| xargs -n1 aws ec2 deregister-image --image-id
+
 clean: ##: Remove any purely-local assets (not Terraform state)
 	rm -rf ami.json *.state .terraform/
