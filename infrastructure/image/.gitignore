@@ -8,3 +8,4 @@ terraform.tfstate.backup
 
 # Assets
 ami.json
+vars.json

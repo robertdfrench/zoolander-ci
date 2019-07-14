@@ -19,11 +19,18 @@ ami.json: $(terraform) .terraform/plugins/init ami.tf packed.state
 	@touch $@
 
 # Checkpoint for a successful packer run
-packed.state: $(packer) packer.json provision.sh
-	$(packer) build packer.json
+packed.state: $(packer) vars.json packer.json provision.sh
+	$(packer) build -var-file=vars.json packer.json
 	@touch $@
 
+vars.json: $(jq) omnios_by_region.json
+	$(call assertEnv, AWS_DEFAULT_REGION)
+	$(jq) \
+		'{region: "$(AWS_DEFAULT_REGION)", omnios_ami: ."'$(AWS_DEFAULT_REGION)'"}' \
+		omnios_by_region.json > $@
+
 deregister_old: filter_old_image_ids.jq  ##: Clean up any old images
+	$(call assertEnv, AWS_DEFAULT_REGION)
 	aws ec2 describe-images --owners self \
 		| jq -rf $< \
 		| xargs -n1 aws ec2 deregister-image --image-id
