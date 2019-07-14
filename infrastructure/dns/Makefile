@@ -12,7 +12,7 @@ remove: $(terraform) .terraform/plugins/init ##: Release the Elastic IP back to 
 	rm -f ip.json
 
 # Machine-readable description of current Elastic IP
-ip.json: $(terrafom) .terraform/plugins/init ip.tf
+ip.json: $(terrafom) .terraform/plugins/init dns.tf
 	$(call assertEnv, AWS_DEFAULT_REGION)
 	$(terraform) apply -auto-approve
 	$(terraform) output -json > $@

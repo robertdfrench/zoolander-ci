@@ -4,7 +4,7 @@ output "zoolander" {
 
 resource "aws_instance" "zoolander" {
   ami             = var.ami.value
-  instance_type   = "t2.medium"
+  instance_type   = "t2.small"
   security_groups = [aws_security_group.zoolander.name]
   key_name        = aws_key_pair.zoolander.key_name
 
