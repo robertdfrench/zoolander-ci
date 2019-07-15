@@ -18,7 +18,7 @@ launch: test $(cargo) ##: Launch new FCGI server, killing old one if it exists
 	nohup $(cargo) run >/tmp/zoolander.out 2>/tmp/zoolander.err &
 
 deploy: remote $(git)  ##: Launch on a working host
-	$(git) push -u zoolander +HEAD:master
+	$(git) push zoolander +HEAD:master
 
 shell: remote.txt ##: Get a root shell on the zoolander host
 	ssh `cat remote.txt | cut -d':' -f1`
