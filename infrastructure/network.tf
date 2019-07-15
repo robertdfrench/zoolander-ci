@@ -6,9 +6,7 @@ locals {
   }
 }
 
-resource "aws_eip" "ip" {
-  vpc = false
-}
+resource "aws_eip" "ip" {}
 
 resource "aws_route53_record" "record" {
   zone_id = data.aws_route53_zone.parent.id
