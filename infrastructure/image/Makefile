@@ -13,6 +13,12 @@ vars.json: $(jq) omnios_by_region.json
 		'{region: "$(AWS_DEFAULT_REGION)", omnios_ami: ."'$(AWS_DEFAULT_REGION)'"}' \
 		omnios_by_region.json > $@
 
+vars.json: $(jq) omnios_by_region.json
+	$(call assertEnv, AWS_DEFAULT_REGION)
+	$(jq) \
+		'{region: "$(AWS_DEFAULT_REGION)", omnios_ami: ."'$(AWS_DEFAULT_REGION)'"}' \
+		omnios_by_region.json > $@
+
 deregister_old: filter_old_image_ids.jq  ##: Clean up any old images
 	$(call assertEnv, AWS_DEFAULT_REGION)
 	aws ec2 describe-images --owners self \
