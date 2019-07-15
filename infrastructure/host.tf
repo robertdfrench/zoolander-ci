@@ -1,3 +1,10 @@
+output "host" {
+  value = {
+    domain_name = local.network.dns
+    ip_address  = aws_instance.zoolander.public_ip
+  }
+}
+
 resource "aws_instance" "zoolander" {
   ami             = data.aws_ami.zoolander_latest.id
   instance_type   = "t2.small"
