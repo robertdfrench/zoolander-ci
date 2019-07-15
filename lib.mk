@@ -8,4 +8,4 @@ assertEnv=@if [ -z $${$(strip $1)+x} ]; then >&2 echo "You need to define \$$$(s
 .DEFAULT=help
 
 help: # Print target descriptions for the current makefile
-	@awk -F':' '/\#\#/ { print "\033[32m"$$1"\033[m","\t",$$3 }' $(firstword $(MAKEFILE_LIST))
+	@awk -F':' '/\#\#/ { printf "\033[32m%-12s\033[m\t%s\n", $$1,$$3 }' $(firstword $(MAKEFILE_LIST))

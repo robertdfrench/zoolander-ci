@@ -1,14 +1,12 @@
 include lib.mk
 
 terraform=$(call which, terraform)
+jq=$(call which, jq)
 
-install: $(terraform) .terraform/plugins/init zoolander.tf ##: Deploy latest infrastructure
+install: $(terraform) .terraform/plugins/init ##: Deploy latest infrastructure
 	$(call assertEnv, AWS_DEFAULT_REGION)
-	$(MAKE) -C image ami.json
-	cp image/ami.json ami.auto.tfvars.json
-	$(MAKE) -C dns ip.json
-	cp dns/ip.json ip.auto.tfvars.json
-	$(terraform) apply -auto-approve
+	$(call assertEnv, DOMAIN_NAME)
+	$(terraform) apply -auto-approve -var 'parent_zone=$(DOMAIN_NAME)'
 	$(terraform) output -json > host.json
 
 uninstall: $(terraform) .terraform/plugins/init ##: Remove any deployed infrastructure
@@ -16,9 +14,9 @@ uninstall: $(terraform) .terraform/plugins/init ##: Remove any deployed infrastr
 	$(terraform) destroy -auto-approve
 
 # Download plugins for each resource provider
-.terraform/plugins/initialized.state: $(terraform) providers.tf
+.terraform/plugins/init: $(terraform) providers.tf
 	$(terraform) init
 	@touch $@
 
 clean: ##: Remove any purely-local assets (not terraform state)
-	rm -rf .terraform ami.auto.tfvars.json host.json
+	rm -rf .terraform ami.auto.tfvars.json host.json ami.auto.tfvars.json

@@ -1,11 +1,7 @@
-output "zoolander" {
-  value = aws_instance.zoolander.public_ip
-}
-
 resource "aws_instance" "zoolander" {
-  ami             = var.ami.value
+  ami             = data.aws_ami.zoolander_latest.id
   instance_type   = "t2.small"
-  security_groups = [aws_security_group.zoolander.name]
+  security_groups = [local.network.security_group]
   key_name        = aws_key_pair.zoolander.key_name
 
   tags = {
@@ -23,6 +19,7 @@ resource "aws_instance" "zoolander" {
 
   provisioner "remote-exec" {
     inline = [
+      format("hostname -s %s", local.network.dns),
       "svcadm enable svc:/network/http",
       "git init zoolander"
     ]
@@ -47,40 +44,10 @@ resource "aws_instance" "zoolander" {
   }
 }
 
-variable "ami" {}
-
-resource "aws_security_group" "zoolander" {
-  name        = "zoolander"
-  description = "SSH, HTTP, and outbound IP4 for Zoolander CI"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [join("/", [data.external.nat_ip.result.ip, 32])]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "zoolander"
-  }
-}
-
-data "external" "nat_ip" {
-  program = ["bash", "-c", "echo '{'\\\"ip\\\": \\\"`dig -4 @resolver1.opendns.com myip.opendns.com +short`\\\"'}'"]
+data "aws_ami" "zoolander_latest" {
+  most_recent = true
+  owners      = ["self"]
+  name_regex  = "^zoolander-*"
 }
 
 resource "aws_key_pair" "zoolander" {
@@ -88,9 +55,7 @@ resource "aws_key_pair" "zoolander" {
   public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
 }
 
-variable "ip" {}
-
 resource "aws_eip_association" "eip_assoc" {
   instance_id   = aws_instance.zoolander.id
-  allocation_id = var.ip.value.id
+  allocation_id = local.network.ip_allocation
 }
