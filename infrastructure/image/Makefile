@@ -3,15 +3,12 @@ include lib.mk
 packer=$(call which, packer)
 jq=$(call which, jq)
 
-install: $(packer) vars.json packer.json provision.sh ##: Build an updated AMI
+install: packed.state ##: Build an updated AMI
+	@echo + Image installation complete
+
+packed.state: $(packer) vars.json packer.json provision.sh ##: Build an updated AMI
 	$(packer) build -var-file=vars.json packer.json
 	@touch $@
-
-vars.json: $(jq) omnios_by_region.json
-	$(call assertEnv, AWS_DEFAULT_REGION)
-	$(jq) \
-		'{region: "$(AWS_DEFAULT_REGION)", omnios_ami: ."'$(AWS_DEFAULT_REGION)'"}' \
-		omnios_by_region.json > $@
 
 vars.json: $(jq) omnios_by_region.json
 	$(call assertEnv, AWS_DEFAULT_REGION)

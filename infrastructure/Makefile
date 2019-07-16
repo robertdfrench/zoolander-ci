@@ -3,7 +3,12 @@ include lib.mk
 terraform=$(call which, terraform)
 jq=$(call which, jq)
 
-install: host.json ##: Deploy latest infrastructure
+install: image/packed.state host.json ##: Deploy latest infrastructure
+	@echo + Infrastructure installation complete
+
+.PHONY: image/packed.state
+image/packed.state:
+	$(MAKE) -C image install
 
 .PHONY: host.json
 host.json: $(terraform) .terraform/plugins/init
