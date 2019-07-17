@@ -19,6 +19,19 @@ resource "aws_instance" "zoolander" {
     host = aws_instance.zoolander.public_ip
   }
 
+  provisioner "remote-exec" {
+    inline = ["mkdir -p /etc/dehydrated"]
+  }
+
+  provisioner "file" {
+    source      = "dehydrated.config"
+    destination = "/etc/dehydrated/config"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["dehydrated --register --accept-terms"]
+  }
+
   provisioner "file" {
     source      = "nginx.conf"
     destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
