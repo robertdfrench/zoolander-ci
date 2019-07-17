@@ -35,7 +35,7 @@ resource "aws_instance" "zoolander" {
       "chown -R nginx /etc/dehydrated",
       "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge",
       "chown -R nginx /opt/ooce/nginx-1.16/html/.well-known",
-      "dehydrated --register --accept-terms"
+      "cd /etc/dehydrated && dehydrated --register --accept-terms"
     ]
   }
 
