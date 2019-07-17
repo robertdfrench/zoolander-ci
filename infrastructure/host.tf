@@ -20,7 +20,10 @@ resource "aws_instance" "zoolander" {
   }
 
   provisioner "remote-exec" {
-    inline = ["mkdir -p /etc/dehydrated"]
+    inline = [
+      "mkdir -p /etc/dehydrated",
+      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge"
+    ]
   }
 
   provisioner "file" {
