@@ -22,7 +22,6 @@ resource "aws_instance" "zoolander" {
   provisioner "remote-exec" {
     inline = [
       "mkdir -p /etc/dehydrated",
-      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge"
     ]
   }
 
@@ -32,7 +31,12 @@ resource "aws_instance" "zoolander" {
   }
 
   provisioner "remote-exec" {
-    inline = ["dehydrated --register --accept-terms"]
+    inline = [
+      "chown -R nginx /etc/dehydrated",
+      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge",
+      "chown -R nginx /opt/ooce/nginx-1.16/html/.well-known",
+      "dehydrated --register --accept-terms"
+    ]
   }
 
   provisioner "file" {
@@ -64,6 +68,18 @@ resource "aws_instance" "zoolander" {
   provisioner "file" {
     source      = "derek_profile.bash"
     destination = "/export/derek/.profile"
+  }
+
+  provisioner "file" {
+    source      = "letsencrypt.crontab"
+    destination = "/tmp/letsencrypt.crontab"
+  }
+
+  provisioner "remote-exec" {
+    # Append letsencrypt.crontab to default crontab
+    inline = [
+      "crontab <(crontab -l && cat /tmp/letsencrypt.crontab)"
+    ]
   }
 }
 
