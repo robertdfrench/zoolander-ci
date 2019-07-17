@@ -37,7 +37,6 @@ rotate: remote.txt ##: Rotate your instance's API tokens
 	@read -s GHPAT && echo "$$GHPAT" \
 		| ssh `cat remote.txt | cut -d':' -f1` bash -c 'cat /dev/stdin > /tmp/ghpat'
 
-
 .PHONY: remote.txt
 remote.txt: $(jq)
 	$(MAKE) -C infrastructure install

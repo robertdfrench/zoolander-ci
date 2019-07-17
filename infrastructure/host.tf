@@ -19,6 +19,26 @@ resource "aws_instance" "zoolander" {
     host = aws_instance.zoolander.public_ip
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /etc/dehydrated",
+    ]
+  }
+
+  provisioner "file" {
+    source      = "dehydrated.config"
+    destination = "/etc/dehydrated/config"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chown -R nginx /etc/dehydrated",
+      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge",
+      "chown -R nginx /opt/ooce/nginx-1.16/html/.well-known",
+      "cd /etc/dehydrated && dehydrated --register --accept-terms"
+    ]
+  }
+
   provisioner "file" {
     source      = "nginx.conf"
     destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
@@ -48,6 +68,18 @@ resource "aws_instance" "zoolander" {
   provisioner "file" {
     source      = "derek_profile.bash"
     destination = "/export/derek/.profile"
+  }
+
+  provisioner "file" {
+    source      = "letsencrypt.crontab"
+    destination = "/tmp/letsencrypt.crontab"
+  }
+
+  provisioner "remote-exec" {
+    # Append letsencrypt.crontab to default crontab
+    inline = [
+      "crontab <(crontab -l && cat /tmp/letsencrypt.crontab)"
+    ]
   }
 }
 
