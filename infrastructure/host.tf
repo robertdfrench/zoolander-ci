@@ -20,66 +20,17 @@ resource "aws_instance" "zoolander" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/dehydrated",
-    ]
+    # Tell the host what its domain name is 
+    inline = [format("hostname -s %s", local.network.dns)]
   }
 
   provisioner "file" {
-    source      = "dehydrated.config"
-    destination = "/etc/dehydrated/config"
+    source      = "provisions"
+    destination = "/tmp"
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "chown -R nginx /etc/dehydrated",
-      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge",
-      "chown -R nginx /opt/ooce/nginx-1.16/html/.well-known",
-      "cd /etc/dehydrated && dehydrated --register --accept-terms"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "nginx.conf"
-    destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      format("hostname -s %s", local.network.dns),
-      "svcadm enable svc:/network/http",
-      "git init zoolander"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "post-receive-hook.sh"
-    destination = "zoolander/.git/hooks/post-receive"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x zoolander/.git/hooks/post-receive",
-      "git config --system receive.denyCurrentBranch ignore",
-      "useradd -b /export -m -s /bin/bash derek"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "derek_profile.bash"
-    destination = "/export/derek/.profile"
-  }
-
-  provisioner "file" {
-    source      = "letsencrypt.crontab"
-    destination = "/tmp/letsencrypt.crontab"
-  }
-
-  provisioner "remote-exec" {
-    # Append letsencrypt.crontab to default crontab
-    inline = [
-      "crontab <(crontab -l && cat /tmp/letsencrypt.crontab)"
-    ]
+    inline = ["/usr/gnu/bin/make -C /tmp/provisions"]
   }
 }
 
