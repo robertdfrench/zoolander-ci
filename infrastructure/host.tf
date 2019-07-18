@@ -45,3 +45,15 @@ resource "aws_key_pair" "zoolander" {
   key_name   = "zoolander"
   public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
 }
+
+resource "aws_volume_attachment" "left" {
+  device_name = "/dev/sdf" # Required Linuxism... Just ignore
+  volume_id   = local.storage.left
+  instance_id = aws_instance.zoolander.id
+}
+
+resource "aws_volume_attachment" "right" {
+  device_name = "/dev/sdg" # Required Linuxism... Just ignore
+  volume_id   = local.storage.right
+  instance_id = aws_instance.zoolander.id
+}

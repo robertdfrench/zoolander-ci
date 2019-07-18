@@ -1,7 +1,7 @@
 locals {
   storage = {
-    left  = aws_ebs_volume.left
-    right = aws_ebs_volume.right
+    left  = aws_ebs_volume.left.id
+    right = aws_ebs_volume.right.id
   }
 }
 
@@ -24,7 +24,7 @@ resource "aws_ebs_volume" "right" {
 }
 
 locals {
-  az          = format("%sa", data.aws_region.current.name)
+  az          = format("%sc", data.aws_region.current.name)
   mirror_size = 1
 }
 
