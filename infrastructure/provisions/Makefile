@@ -27,9 +27,10 @@ letsencrypt: /etc/dehydrated/accounts /opt/ooce/nginx-1.16/html/.well-known/acme
 	cp dehydrated.config $@
 	chown nginx $@
 
-/etc/dehydrated:
-	mkdir -p $@
-	chown nginx $@
+/etc/dehydrated: /persistent
+	mkdir -p /persistent$@
+	chown nginx /persistent$@
+	ln -s /persistent$@ $@
 
 /opt/ooce/nginx-1.16/html/.well-known/acme-challenge: /opt/ooce/nginx-1.16/html/.well-known
 	mkdir -p $@
@@ -63,3 +64,6 @@ derek: /export/derek/.profile;
 
 /export/derek:
 	useradd -b /export -m -s /bin/bash derek
+
+/persistent:
+	zpool create -m $@ persistent c1t5d0 c1t6d0
