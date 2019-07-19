@@ -1,8 +1,11 @@
 locals {
   network = {
     security_group = aws_security_group.zoolander.name
+    az             = format("%sa", data.aws_region.current.name)
   }
 }
+
+data "aws_region" "current" {}
 
 resource "aws_security_group" "zoolander" {
   name        = "zoolander"

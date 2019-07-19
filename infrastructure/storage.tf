@@ -1,31 +1,47 @@
 locals {
   storage = {
-    left  = aws_ebs_volume.left.id
-    right = aws_ebs_volume.right.id
+    attachment = aws_volume_attachment.storage
   }
 }
 
-resource "aws_ebs_volume" "left" {
-  availability_zone = local.az
-  size              = local.mirror_size
+resource "aws_ebs_volume" "storage" {
+  availability_zone = local.network.az
+  size              = 1
 
   tags = {
-    Name = "zoolander-left"
+    Name = "zoolander"
   }
 }
 
-resource "aws_ebs_volume" "right" {
-  availability_zone = local.az
-  size              = local.mirror_size
+resource "aws_volume_attachment" "storage" {
+  device_name  = "/dev/sdf" # Required Linuxism... Just ignore
+  volume_id    = aws_ebs_volume.storage.id
+  instance_id  = local.host.id
+  force_detach = true
 
-  tags = {
-    Name = "zoolander-right"
+  connection {
+    host = local.host.dns
+  }
+
+  provisioner "file" {
+    source      = "provisions"
+    destination = "/tmp"
+  }
+
+  provisioner "remote-exec" {
+    # Connect storage, DNS, and begin provisioning
+    inline = [
+      "zpool create -m /persistent persistent c1t5d0",
+      format("hostname -s %s", local.host.dns),
+      "/usr/gnu/bin/make -C /tmp/provisions"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    when = "destroy"
+
+    inline = [
+      "zpool destroy -f persistent"
+    ]
   }
 }
-
-locals {
-  az          = format("%sc", data.aws_region.current.name)
-  mirror_size = 1
-}
-
-data "aws_region" "current" {}

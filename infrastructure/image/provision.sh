@@ -6,3 +6,16 @@ curl --silent \
 	https://raw.githubusercontent.com/lukas2511/dehydrated/master/dehydrated \
 	> /usr/bin/dehydrated \
 	&& chmod +x /usr/bin/dehydrated
+
+cat >/etc/motd <<EOF
+ #######                                                              #####  ### 
+      #   ####   ####  #        ##   #    # #####  ###### #####      #     #  #  
+     #   #    # #    # #       #  #  ##   # #    # #      #    #     #        #  
+    #    #    # #    # #      #    # # #  # #    # #####  #    #     #        #  
+   #     #    # #    # #      ###### #  # # #    # #      #####      #        #  
+  #      #    # #    # #      #    # #   ## #    # #      #   #      #     #  #  
+ #######  ####   ####  ###### #    # #    # #####  ###### #    #      #####  ### 
+
+~~~~~~~~~~~~~~~ The Continuous Integration appliance for illumos ~~~~~~~~~~~~~~~
+
+EOF

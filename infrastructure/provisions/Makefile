@@ -66,4 +66,4 @@ derek: /export/derek/.profile;
 	useradd -b /export -m -s /bin/bash derek
 
 /persistent:
-	zpool create -m $@ persistent c1t5d0 c1t6d0
+	$(error $@ should have been created by a previous step)
