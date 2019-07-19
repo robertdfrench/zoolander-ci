@@ -38,6 +38,10 @@ resource "aws_volume_attachment" "storage" {
   }
 
   provisioner "remote-exec" {
+    connection {
+      host = format("zoolander-ci.%s", var.parent_zone)
+    }
+
     when = "destroy"
 
     inline = [

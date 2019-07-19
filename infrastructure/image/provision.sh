@@ -17,5 +17,4 @@ cat >/etc/motd <<EOF
  #######  ####   ####  ###### #    # #    # #####  ###### #    #      #####  ### 
 
 ~~~~~~~~~~~~~~~ The Continuous Integration appliance for illumos ~~~~~~~~~~~~~~~
-
 EOF
