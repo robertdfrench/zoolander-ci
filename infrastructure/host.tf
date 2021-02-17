@@ -1,85 +1,39 @@
 output "host" {
   value = {
-    domain_name = local.network.dns
-    ip_address  = aws_instance.zoolander.public_ip
+    domain_name = local.host.dns
   }
 }
 
+locals {
+  host = {
+    id  = aws_instance.zoolander.id
+    dns = aws_route53_record.record.fqdn
+  }
+}
+
+resource "aws_route53_record" "record" {
+  zone_id = data.aws_route53_zone.parent.id
+  name    = "zoolander-ci"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.zoolander.public_ip]
+}
+
+data "aws_route53_zone" "parent" {
+  name = format("%s.", var.parent_zone)
+}
+
+variable "parent_zone" {}
+
 resource "aws_instance" "zoolander" {
-  ami             = data.aws_ami.zoolander_latest.id
-  instance_type   = "t2.small"
-  security_groups = [local.network.security_group]
-  key_name        = aws_key_pair.zoolander.key_name
+  ami               = data.aws_ami.zoolander_latest.id
+  instance_type     = "t2.small"
+  security_groups   = [local.network.security_group]
+  key_name          = aws_key_pair.zoolander.key_name
+  availability_zone = local.network.az
 
   tags = {
     Name = "zoolander"
-  }
-
-  connection {
-    host = aws_instance.zoolander.public_ip
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /etc/dehydrated",
-    ]
-  }
-
-  provisioner "file" {
-    source      = "dehydrated.config"
-    destination = "/etc/dehydrated/config"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chown -R nginx /etc/dehydrated",
-      "mkdir -p /opt/ooce/nginx-1.16/html/.well-known/acme-challenge",
-      "chown -R nginx /opt/ooce/nginx-1.16/html/.well-known",
-      "cd /etc/dehydrated && dehydrated --register --accept-terms"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "nginx.conf"
-    destination = "/etc/opt/ooce/nginx-1.16/nginx.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      format("hostname -s %s", local.network.dns),
-      "svcadm enable svc:/network/http",
-      "git init zoolander"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "post-receive-hook.sh"
-    destination = "zoolander/.git/hooks/post-receive"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x zoolander/.git/hooks/post-receive",
-      "git config --system receive.denyCurrentBranch ignore",
-      "useradd -b /export -m -s /bin/bash derek"
-    ]
-  }
-
-  provisioner "file" {
-    source      = "derek_profile.bash"
-    destination = "/export/derek/.profile"
-  }
-
-  provisioner "file" {
-    source      = "letsencrypt.crontab"
-    destination = "/tmp/letsencrypt.crontab"
-  }
-
-  provisioner "remote-exec" {
-    # Append letsencrypt.crontab to default crontab
-    inline = [
-      "crontab <(crontab -l && cat /tmp/letsencrypt.crontab)"
-    ]
   }
 }
 
@@ -92,9 +46,4 @@ data "aws_ami" "zoolander_latest" {
 resource "aws_key_pair" "zoolander" {
   key_name   = "zoolander"
   public_key = file(pathexpand("~/.ssh/id_rsa.pub"))
-}
-
-resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.zoolander.id
-  allocation_id = local.network.ip_allocation
 }
